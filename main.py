@@ -5,6 +5,7 @@ from models import db, User
 import requests
 import oracledb
 import hashlib
+import os
 
 #---------- DEFINITION OF CONFIGURATION AND CREDENTIALS ----------
 # Initialize the Flask application
@@ -12,20 +13,21 @@ app = Flask(__name__)
 # Enable Cross-Origin Resource Sharing (CORS) with credentials suppor
 CORS(app, supports_credentials=True)
 # Flask application configuration
-app.config['SECRET_KEY'] = 'una_clave_secreta_muy_segura'  # Secret key for signing sessions
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'una_clave_secreta_muy_segura')  # Secret key for signing sessions
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True  # Ensure session cookies are sent over HTTPS
 
-# Configuration settings for the application and database connection.
-un = '' # Username for the Oracle database
-pw = '' # Password for the Oracle database
-dsn = """ """ # Data source name for Oracle database
-# Configuration for Alpha Vantage API access.
-ALPHA_VANTAGE_API_KEY = ''
+# Oracle database connection settings loaded from environment variables
+un = os.getenv('ORACLE_DB_USERNAME', '')
+pw = os.getenv('ORACLE_DB_PASSWORD', '')
+dsn = os.getenv('ORACLE_DB_DSN', '')
+
+# Configuration for Alpha Vantage API access, with API key loaded from environment variable
+ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_KEY', '')
 ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
 
-# Create a connection pool for Oracle database connections
+# Create a connection pool for Oracle database connections using the loaded settings
 pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
